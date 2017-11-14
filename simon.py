@@ -41,10 +41,10 @@ def reset():
     cpx.pixels.fill((0,0,0))
     cpx.pixels.brightness = 0.3
 
-    # this will initialize the colors 
+    # this will initialize the neopixels    
     for i in range(5):
-        play_color_tone(i, 0.5)
-
+        play_color_tone(i, .5 )
+        
     # seed random generator
     random.seed(int(97 * time.monotonic()))
 
@@ -84,13 +84,7 @@ def play_sequence():
     '''
     # set speed for difficulty
     if len(simon) > 0:
-        speed = 1.0
-        if len(simon) >= 30:
-            speed = 0.25
-        elif len(simon) >= 20:
-            speed = 0.5
-        elif len(simon) >= 10:
-            speed = 0.75
+        speed = 1.0 - (len(simon) * 2 / 100)
         
         for i in simon:
             time.sleep(speed - 0.25)
