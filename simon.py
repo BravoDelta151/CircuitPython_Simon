@@ -1,7 +1,27 @@
+#  A Simon game for Circuit Playground Express
+#  Press button A or button B to start.  Button B will include number correct
+#  after each round of play.
+# 
+#  A round in the game consists of the device lighting up one or more buttons 
+#  in a random order, after which the player must reproduce that order by pressing
+#  the the touch pad by the lights.  There are two pads by each of the red (A4, A5), 
+#  green (A6, A7) and blue (A2, A3) lights, but only one by the yellow light(A1). 
+#  As the game progresses, the speed and the number of buttons to be pressed increases.
+#
+#  If a mistake is made, an error tone will play followed by the correct light that was
+#  next in the  sequence blinking twice.  Then the game will reset automatically.
+#
+#  The switch is used as an on/off.  if this doesn't appear to start, try changing the
+#  switch...
+#
+# Author: David Boyd
+# License: MIT License (https://opensource.org/licenses/MIT)
+
 from adafruit_circuitplayground.express import cpx
 import time
 import array
 import random
+
 
 # ID, Pixel Index, Tone, high, low
 RED_ID = [1, 1, 440, (125,0,0), (5,0,0)]
@@ -46,7 +66,7 @@ def reset():
         play_color_tone(i, .5 )
         
     # seed random generator
-    random.seed(int(97 * time.monotonic()))
+    random.seed(int((cpx.temperature + cpx.light) * time.monotonic()))
 
 
 
@@ -84,10 +104,10 @@ def play_sequence():
     '''
     # set speed for difficulty
     if len(simon) > 0:
-        speed = 1.0 - (len(simon) * 2 / 100)
+        speed = max(1.0 - (len(simon) * 4 / 100), .2)
         
         for i in simon:
-            time.sleep(speed - 0.25)
+            time.sleep(max(speed - 0.5, .02))
             play_color_tone(i,speed)
 
 
@@ -115,7 +135,7 @@ def validate_choice(idx, touch):
         plays appropriate tone
     '''
     if simon[idx] == touch:
-        play_color_tone(touch)
+        play_color_tone(touch, 0.7)
         return True
     else:
         play_color_tone(0, 1.5)
@@ -193,7 +213,6 @@ while cpx.switch:
     verbose_score = False
 
     while waiting and cpx.switch:
-        # print("waiting", waiting)
         if cpx.button_a:
             waiting = False
 
@@ -207,4 +226,5 @@ while cpx.switch:
     display_score(len(simon))
 
 if not cpx.switch:
+    cpx.pixels.fill((0, 0, 0))
     print("switch is off")
